@@ -5,12 +5,13 @@
       docker:
         name: nginx
         #image: kitematic/hello-world-nginx
-        image: oracle/oraclelinux
+        image: oraclelinux
         state: started
-        ports:
-          - 8000:80
-        expose:
-          - 80
+        tty: yes
+        #ports:
+        #  - 8000:80
+        #expose:
+        #  - 80
     - name: add container to inventory
       add_host:
         name: nginx
@@ -20,4 +21,4 @@
 
     - name: inside docker
       delegate_to: nginx
-      raw: uname -a
+      shell: uname -a
