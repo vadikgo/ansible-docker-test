@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: docker
   tasks:
     - name: application service
       docker:
@@ -12,13 +12,15 @@
         #  - 8000:80
         #expose:
         #  - 80
-    - name: add container to inventory
-      add_host:
-        name: nginx
-        ansible_connection: docker
+#    - name: add container to inventory
+#      add_host:
+#        name: nginx
+#        ansible_connection: docker
         #ansible_docker_extra_args: "--tlsverify --tlscacert=/path/to/ca.pem --tlscert=/path/to/client-cert.pem --tlskey=/path/to/client-key.pem -H=tcp://myserver.net:4243"
-      changed_when: false
+#      changed_when: false
 
+- hosts: web
+  tasks:
     - name: inside docker
-      delegate_to: nginx
-      shell: uname -a
+      #delegate_to: nginx
+      shell: hostname

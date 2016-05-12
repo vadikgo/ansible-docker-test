@@ -1,2 +1,5 @@
-[web]
+[docker]
 localhost
+
+[web]
+nginx ansible_connection=docker ansible_host=nginx
