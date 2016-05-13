@@ -1,12 +1,10 @@
 ---
 - hosts: docker
   tasks:
-    #- name: check or build image
-    #  docker_image: name=oraclelinux state=present tag=6.7
     - name: application service
       docker:
         name: nginx
-        image: oraclelinux
+        image: oraclelinux:6.7
         state: started
         tty: yes
         #ports:
