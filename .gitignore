@@ -1,0 +1,9 @@
+.vagrant/
+.DS_Store
+!files
+!bin
+*.rpm
+*.tar.gz
+*.pyc
+.*vault_pass.txt
+*.retry
