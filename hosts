@@ -1,5 +1,8 @@
 [docker]
 localhost
 
-[web]
-nginx ansible_connection=docker ansible_host=nginx
+[guest]
+container ansible_connection=docker
+
+[ora]
+oracle ansible_connection=docker

@@ -1,0 +1,39 @@
+---
+- hosts: docker
+  tasks:
+    - name: start container
+      docker:
+        name: oracle
+        hostname: oracle
+        image: oraclelinux:6.7
+        state: started
+        tty: yes
+        privileged: yes
+        shm_size: 2048m
+        ports:
+          - 1521:1521
+        expose:
+          - 1521
+- hosts: ora
+  pre_tasks:
+    - name: ensure packages required are installed
+      yum: pkg={{item}} state=present
+      with_items:
+        - bc
+        - libselinux-python
+        - sudo
+  roles:
+    - ansible-oracle
+  vars:
+    oracle_path: /u01
+    oracle_db_name: OVP
+    oracle_db_home: oracle_db_home
+    ora_user_env:
+      ORACLE_BASE: "{{ oracle_path }}/oracle"
+      ORACLE_SID: "{{ oracle_db_name }}"
+      ORACLE_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}"
+      NLS_LANG: "American_America.UTF8"
+      JAVA_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}/jdk"
+    oracle_installer_uri: http://192.168.10.111:8080
+    #oracle_db_mem: 1024
+    oracle_installer: [p13390677_112040_Linux-x86-64_1of7.zip, p13390677_112040_Linux-x86-64_2of7.zip]

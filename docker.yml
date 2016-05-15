@@ -3,7 +3,8 @@
   tasks:
     - name: application service
       docker:
-        name: nginx
+        name: container
+        #image: jaspeen/oracle-11g
         image: oraclelinux:6.7
         state: started
         tty: yes
@@ -12,8 +13,7 @@
         #expose:
         #  - 80
 
-- hosts: web
+- hosts: guest
   tasks:
     - name: inside docker
-      #delegate_to: nginx
       shell: hostname

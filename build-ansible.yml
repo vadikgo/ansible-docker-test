@@ -1,0 +1,43 @@
+---
+- hosts: docker
+  tasks:
+    - name: application service
+      docker:
+        name: container
+        image: oraclelinux:6.7
+        state: started
+        tty: yes
+
+- hosts: guest
+  tasks:
+      - name: Install rpms
+        yum: name={{ item }} state=present
+        with_items:
+            - sudo
+            - which
+            - asciidoc
+            - tar
+            - "@Development tools"
+            - python-setuptools
+            - python2-devel
+            - libyaml-devel
+            - asciidoc
+            - git
+            - http://cbs.centos.org/kojifiles/packages/python-jinja2/2.7.2/1.el6/noarch/python-jinja2-2.7.2-1.el6.noarch.rpm
+
+      - name: clean git repository
+        file: path={{build_dir}}/ansible state=absent
+
+      - name: Clone ansible git
+        git: repo=https://github.com/ansible/ansible.git dest={{build_dir}}/ansible
+
+      - name: Checkout latest version
+        shell: git checkout tags/$(git tag -l | tail -1) -b $(git tag -l | tail -1)
+        args:
+            chdir: "{{build_dir}}/ansible"
+
+      - name: Build rpm
+        command: make rpm chdir={{build_dir}}/ansible
+
+  vars:
+        build_dir: /tmp/rpms-build
