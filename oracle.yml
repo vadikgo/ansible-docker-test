@@ -22,12 +22,17 @@
         - bc
         - libselinux-python
         - sudo
+    - name: enable sudo tty
+      lineinfile: dest=/etc/sudoers state=present regexp="^Defaults    requiretty$" line="Defaults    !requiretty"
+
   roles:
     - ansible-oracle
   vars:
     oracle_path: /u01
     oracle_db_name: OVP
     oracle_db_home: oracle_db_home
+    oracle_db_pass: OracleUs3r
+    oracle_db_syspass: Oracle4dmin
     ora_user_env:
       ORACLE_BASE: "{{ oracle_path }}/oracle"
       ORACLE_SID: "{{ oracle_db_name }}"
