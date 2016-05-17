@@ -14,6 +14,9 @@
           - 1521:1521
         expose:
           - 1521
+        volumes:
+          - /u01
+
 - hosts: ora
   pre_tasks:
     - name: ensure packages required are installed
