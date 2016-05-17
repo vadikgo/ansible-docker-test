@@ -40,5 +40,5 @@
       NLS_LANG: "American_America.UTF8"
       JAVA_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}/jdk"
     oracle_installer_uri: http://192.168.10.111:8080
-    #oracle_db_mem: 1024
+    oracle_db_mem: 1024
     oracle_installer: [p13390677_112040_Linux-x86-64_1of7.zip, p13390677_112040_Linux-x86-64_2of7.zip]
