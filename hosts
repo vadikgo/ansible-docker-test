@@ -4,5 +4,5 @@ localhost
 [guest]
 container ansible_connection=docker
 
-[ora]
-oracle ansible_connection=docker
+#[ora]
+#oracle ansible_connection=docker

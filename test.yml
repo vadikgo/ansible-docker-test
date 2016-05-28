@@ -1,0 +1,7 @@
+---
+- hosts: docker
+  tasks:
+    - name: application service
+      shell: echo test
+      register: res
+      failed_when: res.rc not in [0, 1]

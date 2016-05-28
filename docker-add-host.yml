@@ -1,8 +1,8 @@
 ---
 - hosts: docker
   tasks:
-    - name: application service
-      docker:
+    - name: start nginx in docker
+      docker_container:
         name: nginx
         image: kitematic/hello-world-nginx
         state: started
@@ -10,12 +10,23 @@
           - 8000:80
         expose:
           - 80
+      tags: [always]
+
     - name: add container to inventory
       add_host:
         name: nginx
         ansible_connection: docker
-        #ansible_docker_extra_args: "--tlsverify --tlscacert=/path/to/ca.pem --tlscert=/path/to/client-cert.pem --tlskey=/path/to/client-key.pem -H=tcp://myserver.net:4243"
       changed_when: false
+      tags: [always]
+
     - name: inside docker
       delegate_to: nginx
-      shell: hostname
+      raw: hostname
+      tags:
+        - hostname
+
+    - name: inside docker 2
+      delegate_to: nginx
+      raw: uname -a
+      tags:
+        - uname

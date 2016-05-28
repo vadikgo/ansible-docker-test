@@ -2,7 +2,7 @@
 - hosts: docker
   tasks:
     - name: application service
-      docker:
+      docker_container:
         name: container
         #image: jaspeen/oracle-11g
         image: oraclelinux:6.7
