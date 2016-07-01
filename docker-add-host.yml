@@ -1,32 +1,27 @@
 ---
 - hosts: docker
   tasks:
-    - name: start nginx in docker
+    - name: start container
       docker_container:
-        name: nginx
-        image: kitematic/hello-world-nginx
+        name: "{{name}}"
+        hostname: "{{name}}"
+        image: oraclelinux:6.8
         state: started
-        ports:
-          - 8000:80
-        expose:
-          - 80
-      tags: [always]
+        tty: yes
 
     - name: add container to inventory
       add_host:
-        name: nginx
+        name: "{{name}}"
+        ansible_host: "{{name}}"
+        ansible_user: root
         ansible_connection: docker
+        groups: containers
       changed_when: false
-      tags: [always]
+  vars:
+      name: ubuntu
 
-    - name: inside docker
-      delegate_to: nginx
-      raw: hostname
-      tags:
-        - hostname
 
-    - name: inside docker 2
-      delegate_to: nginx
-      raw: uname -a
-      tags:
-        - uname
+- hosts: containers
+  tasks:
+    - name: show local vars
+      debug: msg={{ansible_default_ipv4.address}}
