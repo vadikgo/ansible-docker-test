@@ -1,5 +1,6 @@
 ---
-- hosts: docker
+- hosts: localhost
+  connection: local
   tasks:
     - name: start container
       docker_container:
@@ -25,3 +26,13 @@
   tasks:
     - name: show local vars
       debug: msg={{ansible_default_ipv4.address}}
+
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: destroy container
+      docker_container:
+        name: "{{name}}"
+        state: absent
+  vars:
+      name: ubuntu
