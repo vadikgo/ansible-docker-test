@@ -1,14 +1,32 @@
 ---
-- hosts: docker
+- hosts: localhost
+  connection: local
   tasks:
-    - name: application service
+    - name: create build dir
+      file: path={{result_dir}} state=directory
+
+    - name: start build container
       docker_container:
-        name: container
-        image: oraclelinux:6.7
+        name: "{{name}}"
+        hostname: "{{name}}"
+        image: oraclelinux:6.8
         state: started
         tty: yes
+        volumes:
+          - "{{result_dir}}:/vol1"
 
-- hosts: guest
+    - name: add container to inventory
+      add_host:
+        name: "{{name}}"
+        ansible_host: "{{name}}"
+        ansible_user: root
+        ansible_connection: docker
+      changed_when: false
+  vars:
+      name: build1
+      result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
+
+- hosts: build1
   tasks:
       - name: Install rpms
         yum: name={{ item }} state=present
@@ -23,21 +41,33 @@
             - libyaml-devel
             - asciidoc
             - git
-            - http://cbs.centos.org/kojifiles/packages/python-jinja2/2.7.2/1.el6/noarch/python-jinja2-2.7.2-1.el6.noarch.rpm
+            - python-jinja2
 
-      - name: clean git repository
-        file: path={{build_dir}}/ansible state=absent
+      - name: create build dir
+        file: path={{build_dir}} state=directory
 
       - name: Clone ansible git
-        git: repo=https://github.com/ansible/ansible.git dest={{build_dir}}/ansible
-
-      - name: Checkout latest version
-        shell: git checkout tags/$(git tag -l | tail -1) -b $(git tag -l | tail -1)
-        args:
-            chdir: "{{build_dir}}/ansible"
+        git:
+          repo: https://github.com/ansible/ansible.git
+          dest: "{{build_dir}}"
+          recursive: yes
+          version: stable-2.1
 
       - name: Build rpm
-        command: make rpm chdir={{build_dir}}/ansible
+        command: make rpm chdir={{build_dir}}
+
+      - name: copy rpms to /vol1
+        shell: cp -fv {{build_dir}}/rpm-build/*.rpm /vol1/
 
   vars:
         build_dir: /tmp/rpms-build
+
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: destroy build container
+      docker_container:
+        name: "{{name}}"
+        state: absent
+  vars:
+      name: build1
