@@ -12,6 +12,7 @@
         image: oraclelinux:6.8
         state: started
         tty: yes
+        keep_volumes: no
         volumes:
           - "{{result_dir}}:/vol1"
 
