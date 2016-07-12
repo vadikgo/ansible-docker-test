@@ -1,23 +1,28 @@
 ---
-- hosts: docker
+- hosts: localhost
+  connection: local
   tasks:
-    - name: start container
-      docker:
-        name: oracle
-        hostname: oracle
-        image: oraclelinux:6.7
+    - name: start oracle container
+      docker_container:
+        name: "{{name}}"
+        hostname: "{{name}}"
+        image: oraclelinux:6.8
         state: started
         tty: yes
-        privileged: yes
-        shm_size: 2048m
-        ports:
-          - 1521:1521
-        expose:
-          - 1521
-        volumes:
-          - /u01
+        keep_volumes: no
+        shm_size: 1GB
 
-- hosts: ora
+    - name: add container to inventory
+      add_host:
+        name: "{{name}}"
+        ansible_host: "{{name}}"
+        ansible_user: root
+        ansible_connection: docker
+      changed_when: false
+  vars:
+      name: oracle
+
+- hosts: oracle
   pre_tasks:
     - name: ensure packages required are installed
       yum: pkg={{item}} state=present
@@ -27,12 +32,11 @@
         - sudo
     - name: enable sudo tty
       lineinfile: dest=/etc/sudoers state=present regexp="^Defaults    requiretty$" line="Defaults    !requiretty"
-
   roles:
     - ansible-oracle
   vars:
     oracle_path: /u01
-    oracle_db_name: OVP
+    oracle_db_name: DBONE
     oracle_db_home: oracle_db_home
     oracle_db_pass: OracleUs3r
     oracle_db_syspass: Oracle4dmin
@@ -42,6 +46,12 @@
       ORACLE_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}"
       NLS_LANG: "American_America.UTF8"
       JAVA_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}/jdk"
-    oracle_installer_uri: http://192.168.10.111:8080
+    oracle_installer_uri: http://192.168.10.111:8000
     oracle_db_mem: 1024
     oracle_installer: [p13390677_112040_Linux-x86-64_1of7.zip, p13390677_112040_Linux-x86-64_2of7.zip]
+    oracle_latest_patches:
+        - { file_name: patch/p21948347_112040_Linux-x86-64.zip, number: "21948347" }
+        - { file_name: patch/p21972320_112040_Linux-x86-64.zip, number: "21972320", apply: napply -skip_subset -skip_duplicate }
+        - { file_name: patch/p22139245_112040_Linux-x86-64.zip, number: "22139245" }
+    oracle_opatch: opatch/p6880880_112000_Linux-x86-64.zip
+    oracle_opatch_version: 11.2.0.3.12
