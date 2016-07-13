@@ -1,6 +1,7 @@
 ---
 - hosts: localhost
   connection: local
+  gather_facts: none
   tasks:
     - name: start oracle container
       docker_container:
@@ -11,6 +12,8 @@
         tty: yes
         keep_volumes: no
         shm_size: 1GB
+        volumes:
+          - /Users/vad/vol/oracle
 
     - name: add container to inventory
       add_host:
@@ -46,7 +49,8 @@
       ORACLE_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}"
       NLS_LANG: "American_America.UTF8"
       JAVA_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}/jdk"
-    oracle_installer_uri: http://192.168.10.111:8000
+    #oracle_installer_uri: http://192.168.10.111:8000
+    oracle_installer_uri: http://10.21.25.212:8000/ora11204
     oracle_db_mem: 1024
     oracle_installer: [p13390677_112040_Linux-x86-64_1of7.zip, p13390677_112040_Linux-x86-64_2of7.zip]
     oracle_latest_patches:
