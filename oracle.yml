@@ -13,7 +13,7 @@
         keep_volumes: no
         shm_size: 1GB
         volumes:
-          - /Users/vad/vol/oracle
+          - /Users/vad/vol/oracle:/u01
 
     - name: add container to inventory
       add_host:

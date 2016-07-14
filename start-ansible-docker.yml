@@ -1,0 +1,50 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: start ansible container
+      docker_container:
+        name: "{{name}}"
+        hostname: "{{name}}"
+        image: ubuntu:latest
+        state: started
+        tty: yes
+        keep_volumes: no
+
+    - name: add container to inventory
+      add_host:
+        name: "{{name}}"
+        ansible_host: "{{name}}"
+        ansible_user: root
+        ansible_connection: docker
+      changed_when: false
+  vars:
+      name: ansible-docker
+
+- hosts: ansible-docker
+  gather_facts: no
+  tasks:
+    - name: install python
+      raw: "{{item}}"
+      with_items:
+        - apt-get update
+        - apt-get install python --yes
+    - name: preinstall debs
+      apt: name={{ item }} state=present
+      with_items:
+          - sudo
+          - python-docker
+          - unzip
+          - git
+          - python-pip
+          - python-apt
+          - rsync
+    - name: install ansible repo
+      apt_repository: repo='ppa:ansible/ansible'
+    - name: update apt cache
+      apt: update_cache=yes
+    - name: install Ansible
+      apt: name=ansible state=present
+    - name: show ansible version
+      command: ansible --version
