@@ -30,6 +30,10 @@
       with_items:
         - apt-get update
         - apt-get install python --yes
+
+- hosts: ansible-docker
+  gather_facts: yes
+  tasks:
     - name: preinstall debs
       apt: name={{ item }} state=present
       with_items:
@@ -40,11 +44,30 @@
           - python-pip
           - python-apt
           - rsync
+          - vim
+          - apt-transport-https
+          - ca-certificates
     - name: install ansible repo
       apt_repository: repo='ppa:ansible/ansible'
     - name: update apt cache
       apt: update_cache=yes
-    - name: install Ansible
+    - name: install ansible
       apt: name=ansible state=present
     - name: show ansible version
       command: ansible --version
+    - name: add docker repo key
+      apt_key:
+        id: 8118E89F3A912897C070ADBF76221572C52609D
+        keyserver: hkp://p80.pool.sks-keyservers.net:80
+        state: present
+    - name: add docker repo
+      apt_repository: repo="deb https://apt.dockerproject.org/repo ubuntu-{{ansible_lsb.codename}} main" state=present
+    - name: update apt cache
+      apt: update_cache=yes
+    - name: install docker
+      apt: name={{item}} state=present
+      with_items:
+        - docker-compose
+        - docker-engine
+    - name: show docker version
+      command: docker --version
