@@ -8,8 +8,8 @@
 
     - name: start build container
       docker_container:
-        name: "{{name}}"
-        hostname: "{{name}}"
+        name: "{{vmname}}"
+        hostname: "{{vmname}}"
         image: "oraclelinux:7.2"
         state: started
         tty: yes
@@ -19,16 +19,16 @@
 
     - name: add container to inventory
       add_host:
-        name: "{{name}}"
-        ansible_host: "{{name}}"
+        name: "{{vmname}}"
+        ansible_host: "{{vmname}}"
         ansible_user: root
         ansible_connection: docker
       changed_when: false
   vars:
-      name: build1
+      vmname: build-oel7
       result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
 
-- hosts: build1
+- hosts: build-oel7
   gather_facts: no
   tasks:
       - name: enable all repos
@@ -81,7 +81,7 @@
         command: rpmbuild -bb /root/rpmbuild/SPECS/python-jinja2.spec
 
       - name: copy python-jinja2
-        shell: cp -fv /root/rpmbuild/RPMS/noarch/python-jinja2-2.8-5.el7.noarch.rpm /vol1/
+        shell: cp -fv /root/rpmbuild/RPMS/noarch/*.rpm /vol1/
 
   vars:
         build_dir: /tmp/rpms-build
@@ -90,9 +90,9 @@
   gather_facts: no
   connection: local
   tasks:
-    #- name: destroy build container
-    #  docker_container:
-    #    name: "{{name}}"
-    #    state: absent
+    - name: destroy build container
+      docker_container:
+        name: "{{vmname}}"
+        state: absent
   vars:
-      name: build1
+      vmname: build-oel7

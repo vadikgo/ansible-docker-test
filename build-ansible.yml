@@ -10,7 +10,7 @@
       docker_container:
         name: "{{name}}"
         hostname: "{{name}}"
-        image: library/oraclelinux:6.8
+        image: oraclelinux:6.8
         state: started
         tty: yes
         keep_volumes: no
@@ -25,10 +25,11 @@
         ansible_connection: docker
       changed_when: false
   vars:
-      name: build1
+      name: build-oel6
       result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
 
-- hosts: build1
+- hosts: build-oel6
+  gather_facts: no
   tasks:
       - name: Install rpms
         yum: name={{ item }} state=present
@@ -43,6 +44,8 @@
             - asciidoc
             - git
             - python-jinja2
+            - python-sphinx
+            - python-markupsafe
 
       - name: create build dir
         file: path={{build_dir}} state=directory
@@ -60,6 +63,23 @@
       - name: copy rpms to /vol1
         shell: cp -fv {{build_dir}}/rpm-build/*.rpm /vol1/
 
+      - name: download jinja2
+        command: curl https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1 -o /root/python-jinja2-2.8-5.fc24.src.rpm
+
+      - name: install jinja2 src rpm
+        command: rpm -ivh python-jinja2-2.8-5.fc24.src.rpm
+        args:
+            chdir: /root
+
+      - name: download spec file
+        command: curl https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2.spec?dl=1 -o /root/rpmbuild/SPECS/python-jinja2.spec
+
+      - name: build python-jinja2
+        command: rpmbuild -bb /root/rpmbuild/SPECS/python-jinja2.spec
+
+      - name: copy python-jinja2
+        shell: cp -fv /root/rpmbuild/RPMS/noarch/*.rpm /vol1/
+
   vars:
         build_dir: /tmp/rpms-build
 
@@ -70,6 +90,6 @@
     - name: destroy build container
       docker_container:
         name: "{{name}}"
-        #state: absent
+        state: absent
   vars:
-      name: build1
+      name: build-oel6
