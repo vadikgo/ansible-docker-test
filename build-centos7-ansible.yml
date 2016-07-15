@@ -10,7 +10,7 @@
       docker_container:
         name: "{{name}}"
         hostname: "{{name}}"
-        image: library/oraclelinux:6.8
+        image: "oraclelinux:7.2"
         state: started
         tty: yes
         keep_volumes: no
@@ -29,7 +29,13 @@
       result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
 
 - hosts: build1
+  gather_facts: no
   tasks:
+      - name: enable all repos
+        replace:
+          dest: /etc/yum.repos.d/public-yum-ol7.repo
+          regexp: ^enabled=0
+          replace: enabled=1
       - name: Install rpms
         yum: name={{ item }} state=present
         with_items:
@@ -38,11 +44,11 @@
             - tar
             - "@Development tools"
             - python-setuptools
-            - python2-devel
-            - libyaml-devel
-            - asciidoc
+            - python-devel
             - git
             - python-jinja2
+            - libyaml-devel
+            - python-sphinx
 
       - name: create build dir
         file: path={{build_dir}} state=directory
@@ -60,16 +66,33 @@
       - name: copy rpms to /vol1
         shell: cp -fv {{build_dir}}/rpm-build/*.rpm /vol1/
 
+      - name: download jinja2
+        command: curl https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1 -o /root/python-jinja2-2.8-5.fc24.src.rpm
+
+      - name: install jinja2 src rpm
+        command: rpm -ivh python-jinja2-2.8-5.fc24.src.rpm
+        args:
+            chdir: /root
+
+      - name: download spec file
+        command: curl https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2.spec?dl=1 -o /root/rpmbuild/SPECS/python-jinja2.spec
+
+      - name: build python-jinja2
+        command: rpmbuild -bb /root/rpmbuild/SPECS/python-jinja2.spec
+
+      - name: copy python-jinja2
+        shell: cp -fv /root/rpmbuild/RPMS/noarch/python-jinja2-2.8-5.el7.noarch.rpm /vol1/
+
   vars:
         build_dir: /tmp/rpms-build
 
 - hosts: localhost
-  connection: local
   gather_facts: no
+  connection: local
   tasks:
-    - name: destroy build container
-      docker_container:
-        name: "{{name}}"
-        #state: absent
+    #- name: destroy build container
+    #  docker_container:
+    #    name: "{{name}}"
+    #    state: absent
   vars:
       name: build1
