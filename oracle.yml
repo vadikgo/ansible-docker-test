@@ -2,6 +2,7 @@
 - hosts: localhost
   connection: local
   gather_facts: none
+  tags: docker
   tasks:
     - name: start oracle container
       docker_container:
@@ -12,8 +13,6 @@
         tty: yes
         keep_volumes: no
         shm_size: 1GB
-        volumes:
-          - /Users/vad/vol/oracle:/u01
 
     - name: add container to inventory
       add_host:
@@ -25,7 +24,10 @@
   vars:
       name: oracle
 
-- hosts: oracle
+- hosts: all
+  tags: install
+  become: yes
+  become_user: root
   pre_tasks:
     - name: ensure packages required are installed
       yum: pkg={{item}} state=present
@@ -35,11 +37,14 @@
         - sudo
     - name: enable sudo tty
       lineinfile: dest=/etc/sudoers state=present regexp="^Defaults    requiretty$" line="Defaults    !requiretty"
+    - name: Set /dev/shm size
+      shell: mount -o remount,size=$(free -m|awk '/^Mem/ {print $2}')m /dev/shm
+      when: ansible_connection != 'docker'
   roles:
     - ansible-oracle
   vars:
     oracle_path: /u01
-    oracle_db_name: DBONE
+    oracle_db_name: DB1
     oracle_db_home: oracle_db_home
     oracle_db_pass: OracleUs3r
     oracle_db_syspass: Oracle4dmin
@@ -49,8 +54,8 @@
       ORACLE_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}"
       NLS_LANG: "American_America.UTF8"
       JAVA_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}/jdk"
-    #oracle_installer_uri: http://192.168.10.111:8000
-    oracle_installer_uri: http://10.21.25.212:8000/ora11204
+    oracle_installer_uri: http://192.168.10.111:8000
+    #oracle_installer_uri: http://10.21.25.212:8000/ora11204
     oracle_db_mem: 1024
     oracle_installer: [p13390677_112040_Linux-x86-64_1of7.zip, p13390677_112040_Linux-x86-64_2of7.zip]
     oracle_latest_patches:
