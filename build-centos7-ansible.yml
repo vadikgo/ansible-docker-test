@@ -8,9 +8,9 @@
 
     - name: start build container
       docker_container:
-        name: "{{name}}"
-        hostname: "{{name}}"
-        image: oraclelinux:6.8
+        name: "{{vmname}}"
+        hostname: "{{vmname}}"
+        image: "oraclelinux:7.2"
         state: started
         tty: yes
         keep_volumes: no
@@ -19,18 +19,23 @@
 
     - name: add container to inventory
       add_host:
-        name: "{{name}}"
-        ansible_host: "{{name}}"
+        name: "{{vmname}}"
+        ansible_host: "{{vmname}}"
         ansible_user: root
         ansible_connection: docker
       changed_when: false
   vars:
-      name: build-oel6
+      vmname: build-oel7
       result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
 
-- hosts: build-oel6
+- hosts: build-oel7
   gather_facts: no
   tasks:
+      - name: enable all repos
+        replace:
+          dest: /etc/yum.repos.d/public-yum-ol7.repo
+          regexp: ^enabled=0
+          replace: enabled=1
       - name: Install rpms
         yum: name={{ item }} state=present
         with_items:
@@ -39,13 +44,11 @@
             - tar
             - "@Development tools"
             - python-setuptools
-            - python2-devel
-            - libyaml-devel
-            - asciidoc
+            - python-devel
             - git
             - python-jinja2
+            - libyaml-devel
             - python-sphinx
-            - python-markupsafe
 
       - name: create build dir
         file: path={{build_dir}} state=directory
@@ -84,12 +87,12 @@
         build_dir: /tmp/rpms-build
 
 - hosts: localhost
-  connection: local
   gather_facts: no
+  connection: local
   tasks:
     - name: destroy build container
       docker_container:
-        name: "{{name}}"
+        name: "{{vmname}}"
         state: absent
   vars:
-      name: build-oel6
+      vmname: build-oel7
