@@ -1,0 +1,87 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: create build dir
+      file: path={{result_dir}} state=directory
+
+    - name: start build container
+      docker_container:
+        name: "{{vmname}}"
+        hostname: "{{vmname}}"
+        image: "ubuntu:latest"
+        state: started
+        tty: yes
+        keep_volumes: no
+        volumes:
+          - "{{result_dir}}:/vol1"
+
+    - name: add container to inventory
+      add_host:
+        name: "{{vmname}}"
+        ansible_host: "{{vmname}}"
+        ansible_user: root
+        ansible_connection: docker
+      changed_when: false
+  vars:
+      vmname: build-ubuntu
+      result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
+
+- hosts: build-ubuntu
+  gather_facts: no
+  tasks:
+    - name: install python
+      raw: "{{item}}"
+      with_items:
+        - apt-get update
+        - apt-get install python --yes
+
+- hosts: build-ubuntu
+  gather_facts: no
+  tasks:
+      - name: preinstall debs
+        apt: name={{ item }} state=present
+        with_items:
+            - sudo
+            - python-docker
+            - git
+            - python-pip
+            - python-apt
+            - apt-transport-https
+            - ca-certificates
+            - build-essential
+            - asciidoc
+            - devscripts
+            - cdbs
+            - debhelper
+      - name: install ansible repo
+        apt_repository: repo='ppa:ansible/ansible'
+      - name: create build dir
+        file: path={{build_dir}} state=directory
+
+      - name: Clone ansible git
+        git:
+          repo: https://github.com/ansible/ansible.git
+          dest: "{{build_dir}}"
+          recursive: yes
+
+      - name: Build deb
+        command: make deb chdir={{build_dir}}
+
+      - name: copy deb to /vol1
+        shell: cp -fv {{build_dir}}/deb-build/unstable/*.deb /vol1/
+
+  vars:
+        build_dir: /tmp/deb-build
+
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  tasks:
+    - name: destroy build container
+      docker_container:
+        name: "{{vmname}}"
+        state: absent
+  vars:
+      vmname: build-ubuntu
