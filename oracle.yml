@@ -24,10 +24,11 @@
   vars:
       name: oracle
 
-- hosts: all
-  tags: install
-  become: yes
-  become_user: root
+- hosts: oracle
+#- hosts: all
+  #tags: install
+  #become: yes
+  #become_user: root
   pre_tasks:
     - name: ensure packages required are installed
       yum: pkg={{item}} state=present
@@ -48,12 +49,6 @@
     oracle_db_home: oracle_db_home
     oracle_db_pass: OracleUs3r
     oracle_db_syspass: Oracle4dmin
-    ora_user_env:
-      ORACLE_BASE: "{{ oracle_path }}/oracle"
-      ORACLE_SID: "{{ oracle_db_name }}"
-      ORACLE_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}"
-      NLS_LANG: "American_America.UTF8"
-      JAVA_HOME: "{{ oracle_path }}/oracle/product/11.2.0/{{ oracle_db_home }}/jdk"
     oracle_installer_uri: http://192.168.10.111:8000
     #oracle_installer_uri: http://10.21.25.212:8000/ora11204
     oracle_db_mem: 1024

@@ -1,19 +1,17 @@
 ---
 - hosts: docker
+  connection: local
+  gather_facts: no
   tasks:
     - name: application service
       docker_container:
-        name: container
-        #image: jaspeen/oracle-11g
-        image: oraclelinux:6.7
+        name: test1
+        image: oraclelinux:6.8
         state: started
         tty: yes
-        #ports:
-        #  - 8000:80
-        #expose:
-        #  - 80
-        volumes:
-          - /u01
+        purge_networks: yes
+        networks:
+          - net1
 
 - hosts: guest
   tasks:
