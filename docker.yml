@@ -1,19 +1,44 @@
 ---
-- hosts: docker
+- hosts: localhost
   connection: local
   gather_facts: no
   tasks:
     - name: application service
       docker_container:
-        name: test1
+        name: "{{vmname}}"
+        hostname: "{{vmname}}"
         image: oraclelinux:6.8
         state: started
         tty: yes
-        purge_networks: yes
-        networks:
-          - net1
+    - name: add container to inventory
+      add_host:
+        name: "{{vmname}}"
+        ansible_host: "{{vmname}}"
+        ansible_user: root
+        ansible_connection: docker
+        groups: docker
+      changed_when: false
+  vars:
+      vmname: test1
 
-- hosts: guest
+- hosts: docker
   tasks:
-    - name: inside docker
-      shell: hostname
+    - name: install dnsmasq
+      yum: name=dnsmasq state=present
+    #- name: start dnsmasq
+    #  command: dnsmasq --local-service --host-record=
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: modify /etc/hosts
+      docker_container:
+        name: "{{vmname}}"
+        hostname: "{{vmname}}"
+        image: oraclelinux:6.8
+        state: started
+        tty: yes
+        etc_hosts: "{{groups['docker']|map('extract', hostvars)|host_and_ip}}"
+  vars:
+      vmname: test1
