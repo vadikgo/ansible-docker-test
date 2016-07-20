@@ -7,3 +7,4 @@
 *.pyc
 .*vault_pass.txt
 *.retry
+roles/ansible-oracle
