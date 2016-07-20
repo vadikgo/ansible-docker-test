@@ -1,13 +1,19 @@
 # ansible-docker-test
 
-* Upgrade pip
+### playbooks list
 
-`sudo pip install --upgrade pip`
+* build-ansible.yml - build ansible rpm for centos 6 in docker container
 
-* Install doker-py
+* build-centos7-ansible.yml - build ansible rpm for centos 7 in docker container
 
-`sudo pip install docker-py`
+* buildubuntu-ansible - build ansible deb for ubuntu
 
-* Start container
+* start-ansible-docker.yml - start docker container with ansible on ubuntu
 
-`ansible-playbook docker.py -v`
+* oracle.yml - install oracle 11.2 in docker container
+
+* oracle-vagrant.yml - install oracle 11.2 in vagrant box
+
+### load roles
+
+`ansible-galaxy install -r requirements.yml -p roles`
