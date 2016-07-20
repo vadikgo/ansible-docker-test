@@ -25,10 +25,9 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "ansible" do |ansible|
     ansible.verbose = "v"
-    ansible.tags = ["install"]
     ansible.groups = {
       "oracle" => ["oracle"]
     }
-    ansible.playbook = "oracle.yml"
+    ansible.playbook = "oracle-vagrant.yml"
   end
 end
