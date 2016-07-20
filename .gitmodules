@@ -1,3 +1,0 @@
-[submodule "roles/ansible-oracle"]
-	path = roles/ansible-oracle
-	url = https://github.com/vadikgo/ansible-oracle.git
