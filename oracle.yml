@@ -45,9 +45,9 @@
     - ansible-oracle
   vars:
     oracle_path: /u01
-    oracle_db_name: DB1
+    oracle_db_name: OVP
     oracle_db_home: oracle_db_home
-    oracle_db_pass: OracleUs3r
+    oracle_db_pass: oracle
     oracle_db_syspass: Oracle4dmin
     oracle_installer_uri: http://192.168.10.111:8000
     #oracle_installer_uri: http://10.21.25.212:8000/ora11204
@@ -57,6 +57,6 @@
         - { file_name: patch/p21948347_112040_Linux-x86-64.zip, number: "21948347" }
         - { file_name: patch/p21972320_112040_Linux-x86-64.zip, number: "21972320", apply: napply -skip_subset -skip_duplicate }
         - { file_name: patch/p22139245_112040_Linux-x86-64.zip, number: "22139245" }
-        #- { file_name: patch/p22037014_112040_Linux-x86-64.zip, number: "22037014" } # DST25
+        - { file_name: patch/p22037014_112040_Linux-x86-64.zip, number: "22037014" } # DST25
     oracle_opatch: opatch/p6880880_112000_Linux-x86-64.zip
     oracle_opatch_version: 11.2.0.3.12
