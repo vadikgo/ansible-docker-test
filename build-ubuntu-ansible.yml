@@ -35,7 +35,7 @@
       raw: "{{item}}"
       with_items:
         - apt-get update
-        - apt-get install python --yes
+        - apt-get install python-minimal --yes
 
 - hosts: build-ubuntu
   gather_facts: no

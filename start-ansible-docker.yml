@@ -29,7 +29,7 @@
       raw: "{{item}}"
       with_items:
         - apt-get update
-        - apt-get install python --yes
+        - apt-get install python-minimal --yes
 
 - hosts: ansible-docker
   gather_facts: yes
@@ -40,6 +40,7 @@
           - sudo
           - iputils-ping
           - tar
+          - time
           - python-docker
           - unzip
           - git
@@ -49,6 +50,7 @@
           - vim
           - apt-transport-https
           - ca-certificates
+          - pxz
     - name: install ansible repo
       apt_repository: repo='ppa:ansible/ansible'
     - name: update apt cache
