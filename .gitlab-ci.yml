@@ -1,0 +1,6 @@
+build:
+  script:
+    - ansible-playbook build-ansible.yml -e "result_dir=$CI_PROJECT_DIR"
+  artifacts:
+    paths:
+    - '*.rpm'
