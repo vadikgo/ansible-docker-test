@@ -1,6 +1,26 @@
-build:
+stages:
+  - lint
+  - build
+lint-centos6:
+  stage: lint
+  script:
+    - ansible-lint -x "ANSIBLE0012,ANSIBLE0006,ANSIBLE0013" build-ansible.yml
+lint-centos7:
+  stage: lint
+  script:
+    - ansible-lint -x "ANSIBLE0012,ANSIBLE0006,ANSIBLE0013" build-centos7-ansible.yml
+build-centos6:
+  stage: build
   script:
     - ansible-playbook build-ansible.yml -e "result_dir=$CI_PROJECT_DIR"
   artifacts:
     paths:
     - '*.rpm'
+build-centos7:
+  stage: build
+  script:
+    - ansible-playbook build-centos7-ansible.yml -e "result_dir=$CI_PROJECT_DIR"
+  artifacts:
+    paths:
+    - '*.rpm'
+
