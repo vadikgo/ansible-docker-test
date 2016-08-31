@@ -13,14 +13,18 @@ build-centos6:
   stage: build
   script:
     - ansible-playbook build-ansible.yml -e "result_dir=$CI_PROJECT_DIR"
+    - ls *.rpm | xargs -I {} sh -c "md5 -q {} > {}.md5"
   artifacts:
     paths:
     - '*.rpm'
+    - '*.rpm.md5'
 build-centos7:
   stage: build
   script:
     - ansible-playbook build-centos7-ansible.yml -e "result_dir=$CI_PROJECT_DIR"
+    - ls *.rpm | xargs -I {} sh -c "md5 -q {} > {}.md5"
   artifacts:
     paths:
     - '*.rpm'
+    - '*.rpm.md5'
 
