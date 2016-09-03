@@ -1,0 +1,78 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: create build dir
+      file: path={{result_dir}} state=directory
+
+    - name: start build container
+      docker_container:
+        name: "{{name}}"
+        hostname: "{{name}}"
+        image: centos:6.8
+        state: started
+        tty: yes
+        keep_volumes: no
+        volumes:
+          - "{{result_dir}}:/vol1"
+
+    - name: add container to inventory
+      add_host:
+        name: "{{name}}"
+        ansible_host: "{{name}}"
+        ansible_user: root
+        ansible_connection: docker
+      changed_when: false
+  vars:
+      name: build-centos6
+      result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
+
+- hosts: build-centos6
+  gather_facts: no
+  tasks:
+      - name: Install rpms
+        yum: name={{ item }} state=present
+        with_items:
+            - which
+            - asciidoc
+            - tar
+            - "@Development tools"
+            - python-setuptools
+            - python2-devel
+            - libyaml-devel
+            - asciidoc
+            - git
+            - python-jinja2
+            - python-sphinx
+            - python-markupsafe
+
+      - name: create build dir
+        file: path={{build_dir}} state=directory
+
+      - name: Clone ansible git
+        git:
+          repo: https://github.com/ansible/ansible.git
+          dest: "{{build_dir}}"
+          recursive: yes
+          version: stable-2.1
+
+      - name: Build rpm
+        command: make rpm chdir={{build_dir}}
+
+      - name: copy rpms to /vol1
+        shell: cp -fv {{build_dir}}/rpm-build/*.rpm /vol1/
+
+  vars:
+        build_dir: /tmp/rpms-build
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: destroy build container
+      docker_container:
+        name: "{{name}}"
+        state: absent
+  vars:
+      name: build-centos6
