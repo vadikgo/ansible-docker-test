@@ -60,8 +60,13 @@
       - name: Build rpm
         command: make rpm chdir={{build_dir}}
 
+      - name: find rpms
+        find: paths="{{build_dir}}/rpm-build" patterns="*.rpm"
+        register: rpms
+
       - name: copy rpms to /vol1
-        shell: cp -fv {{build_dir}}/rpm-build/*.rpm /vol1/
+        copy: src={{item.path}} dest=/vol1/ remote_src=yes
+        with_items: "{{rpms.files}}"
 
   vars:
         build_dir: /tmp/rpms-build
