@@ -76,7 +76,7 @@
         command: rpm -i https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1
 
       - name: download spec file
-        get_url: 
+        get_url:
           url: https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2.spec?dl=1
           dest: /root/rpmbuild/SPECS/python-jinja2.spec
 
