@@ -10,7 +10,7 @@
       docker_container:
         name: "{{vmname}}"
         hostname: "{{vmname}}"
-        image: "oraclelinux:7.2"
+        image: "centos:7"
         state: started
         tty: yes
         keep_volumes: no
@@ -25,15 +25,15 @@
         ansible_connection: docker
       changed_when: false
   vars:
-      vmname: build-oel7
+      vmname: build-centos7
       result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
 
-- hosts: build-oel7
+- hosts: build-centos7
   gather_facts: no
   tasks:
       - name: enable all repos
         replace:
-          dest: /etc/yum.repos.d/public-yum-ol7.repo
+          dest: /etc/yum.repos.d/CentOS-Base.repo
           regexp: ^enabled=0
           replace: enabled=1
       - name: Install rpms
@@ -49,6 +49,7 @@
             - python-jinja2
             - libyaml-devel
             - python-sphinx
+            - pytest
 
       - name: create build dir
         file: path={{build_dir}} state=directory
@@ -63,25 +64,32 @@
       - name: Build rpm
         command: make rpm chdir={{build_dir}}
 
-      - name: copy rpms to /vol1
-        shell: cp -fv {{build_dir}}/rpm-build/*.rpm /vol1/
+      - name: find rpms
+        find: paths="{{build_dir}}/rpm-build" patterns="*.rpm"
+        register: rpms
 
-      - name: download jinja2
-        command: curl https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1 -o /root/python-jinja2-2.8-5.fc24.src.rpm
+      - name: copy rpms to /vol1
+        copy: src={{item.path}} dest=/vol1/ remote_src=yes
+        with_items: "{{rpms.files}}"
 
       - name: install jinja2 src rpm
-        command: rpm -ivh python-jinja2-2.8-5.fc24.src.rpm
-        args:
-            chdir: /root
+        command: rpm -i https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1
 
       - name: download spec file
-        command: curl https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2.spec?dl=1 -o /root/rpmbuild/SPECS/python-jinja2.spec
+        get_url: 
+          url: https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2.spec?dl=1
+          dest: /root/rpmbuild/SPECS/python-jinja2.spec
 
       - name: build python-jinja2
         command: rpmbuild -bb /root/rpmbuild/SPECS/python-jinja2.spec
 
-      - name: copy python-jinja2
-        shell: cp -fv /root/rpmbuild/RPMS/noarch/*.rpm /vol1/
+      - name: find jinja2 rpms
+        find: paths="/root/rpmbuild/RPMS/noarch" patterns="*.rpm"
+        register: j2rpms
+
+      - name: copy rpms to /vol1
+        copy: src={{item.path}} dest=/vol1/ remote_src=yes
+        with_items: "{{j2rpms.files}}"
 
   vars:
         build_dir: /tmp/rpms-build
@@ -95,4 +103,4 @@
         name: "{{vmname}}"
         state: absent
   vars:
-      vmname: build-oel7
+      vmname: build-centos7
