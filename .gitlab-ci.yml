@@ -4,11 +4,11 @@ stages:
 lint-centos6:
   stage: lint
   script:
-    - ansible-lint -x "ANSIBLE0012" build-centos6-ansible.yml
+    - ansible-lint -x "ANSIBLE0012,ANSIBLE0006" build-centos6-ansible.yml
 lint-centos7:
   stage: lint
   script:
-    - ansible-lint -x "ANSIBLE0012,ANSIBLE0006,ANSIBLE0013" build-centos7-ansible.yml
+    - ansible-lint -x "ANSIBLE0012,ANSIBLE0006" build-centos7-ansible.yml
 build-centos6:
   stage: build
   script:
