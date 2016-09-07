@@ -69,24 +69,36 @@
         copy: src={{item.path}} dest=/vol1/ remote_src=yes
         with_items: "{{rpms.files}}"
 
-      - name: install jinja2 src rpm
-        command: rpm -i https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1 creates=/root/rpmbuild
+      - name: install epel
+        yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 
-      - name: download spec file
-        get_url:
-          url: https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2.8-rh6.spec?dl=1
-          dest: /root/rpmbuild/SPECS/python-jinja2.8-rh6.spec
+      - name: install ansible
+        yum: name={{item.path}}
+        with_items: "{{rpms.files}}"
+
+      - name: install jinja2 src rpm
+        command: rpm -i https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1 creates=/root/rpmbuild/SPECS/python-jinja2.spec
+
+      - name: copy python-jinja2.8-rh.spec for rhel
+        copy: src=python-jinja2.8-rh.spec dest=/root/rpmbuild/SPECS/python-jinja2.8-rh.spec
 
       - name: build python-jinja2
-        command: rpmbuild -bb /root/rpmbuild/SPECS/python-jinja2.8-rh6.spec creates=/root/rpmbuild/RPMS/noarch
-
-      - name: find jinja2 rpms
-        find: paths="/root/rpmbuild/RPMS/noarch" patterns="*.rpm"
-        register: j2rpms
+        command: rpmbuild -bb /root/rpmbuild/SPECS/python-jinja2.8-rh.spec creates=/root/rpmbuild/RPMS/noarch/python-jinja2-2.8-5.el6.noarch.rpm
 
       - name: copy rpms to /vol1
-        copy: src={{item.path}} dest=/vol1/ remote_src=yes
-        with_items: "{{j2rpms.files}}"
+        copy: src=/root/rpmbuild/RPMS/noarch/python-jinja2-2.8-5.el6.noarch.rpm dest=/vol1/ remote_src=yes
+
+      - name: install ansible-lint src rpm
+        command: rpm -i https://dl.fedoraproject.org/pub/fedora/linux/updates/23/SRPMS/a/ansible-lint-3.2.5-1.fc23.src.rpm creates=/root/rpmbuild/SPECS/ansible-lint.spec
+
+      - name: copy ansible-lint.spec for rhel
+        copy: src=ansible-lint-rh.spec dest=/root/rpmbuild/SPECS/ansible-lint-rh.spec
+
+      - name: build ansible-lint
+        command: rpmbuild -bb /root/rpmbuild/SPECS/ansible-lint-rh.spec creates=/root/rpmbuild/RPMS/noarch/ansible-lint-3.2.5-1.el6.noarch.rpm
+
+      - name: copy rpms to /vol1
+        copy: src=/root/rpmbuild/RPMS/noarch/ansible-lint-3.2.5-1.el6.noarch.rpm dest=/vol1/ remote_src=yes
 
   vars:
         build_dir: /tmp/rpms-build
