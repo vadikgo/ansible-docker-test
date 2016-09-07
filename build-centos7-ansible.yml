@@ -62,7 +62,7 @@
           version: stable-2.1
 
       - name: Build rpm
-        command: make rpm chdir={{build_dir}}
+        command: make rpm chdir={{build_dir}} creates={{build_dir}}/rpm-build
 
       - name: find rpms
         find: paths="{{build_dir}}/rpm-build" patterns="*.rpm"
@@ -73,15 +73,16 @@
         with_items: "{{rpms.files}}"
 
       - name: install jinja2 src rpm
-        command: rpm -i https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1
+        command: rpm -i https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2-2.8-5.fc24.src.rpm?dl=1 creates=/root/rpmbuild
 
       - name: download spec file
         get_url:
           url: https://dl.dropboxusercontent.com/u/2296931/python-jinja2/python-jinja2.spec?dl=1
           dest: /root/rpmbuild/SPECS/python-jinja2.spec
 
+
       - name: build python-jinja2
-        command: rpmbuild -bb /root/rpmbuild/SPECS/python-jinja2.spec
+        command: rpmbuild -bb /root/rpmbuild/SPECS/python-jinja2.spec creates=/root/rpmbuild/RPMS/noarch
 
       - name: find jinja2 rpms
         find: paths="/root/rpmbuild/RPMS/noarch" patterns="*.rpm"

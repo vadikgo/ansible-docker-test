@@ -1,7 +1,16 @@
 ---
-- hosts: docker
+- hosts: localhost
+  connection: local
+  gather_facts: no
   tasks:
     - name: application service
-      shell: echo test
-      register: res
-      failed_when: res.rc not in [0, 1]
+      debug: msg="{{item[0]}}"
+      with_items: "{{users}}"
+  vars:
+      users:
+        alice:
+          - par1
+          - par2
+        bob:
+          - par3
+          - par4
