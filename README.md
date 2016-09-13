@@ -2,9 +2,9 @@
 
 ### playbooks list
 
-* build-ansible.yml - build ansible rpm for centos 6 in docker container
+* build-centos6-ansible.yml - build ansible rpms for centos 6 in docker container
 
-* build-centos7-ansible.yml - build ansible rpm for centos 7 in docker container
+* build-centos7-ansible.yml - build ansible rpms for centos 7 in docker container
 
 * buildubuntu-ansible - build ansible deb for ubuntu
 
@@ -14,6 +14,6 @@
 
 * oracle-vagrant.yml - install oracle 11.2 in vagrant box
 
-### load roles
+### load roles (only for oracle tests)
 
 `ansible-galaxy install -r requirements.yml -p roles`
