@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+name="gitlabget"
+
+docker run -td --name $name centos:6 bash
+docker cp get_gitlab_centos.sh $name:get_gitlab_centos.sh
+docker exec -t $name /get_gitlab_centos.sh
+
+docker cp $name:rpm ~/Downloads/gitlab/
+docker rm -f $name
+
+ls -lA ~/Downloads/gitlab/
