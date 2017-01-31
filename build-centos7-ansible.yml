@@ -26,7 +26,7 @@
       changed_when: false
   vars:
       vmname: build-centos7
-      result_dir: "{{lookup('env','HOME')}}/dev/build-rpm"
+      result_dir: "{{'~/dev/build-rpm' | expanduser}}"
 
 - hosts: build-centos7
   gather_facts: no
