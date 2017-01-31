@@ -9,6 +9,9 @@
         aws_secret_key: 5C6xmOFzFtjpIsEdFuhR/gV9Rvcs8brILJAjsx4l
         s3_url: fakes3://127.0.0.1:9000
         bucket: files
-        mode: geturl
-        object: /mpv-media-player.pdf
-        dest: "{{'~/Downloads/tmp/info.pdf' | expanduser}}"
+        mode: get
+        object: "/{{ file_name }}"
+        dest: "{{ dest | expanduser }}/{{ file_name }}"
+  vars:
+    file_name: mpv-media-player.pdf
+    dest: ~/Downloads/tmp
